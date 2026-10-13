@@ -299,7 +299,7 @@ body.yw-on .yw-lk{display:flex;align-items:center;gap:4px;margin-left:auto;margi
 <symbol id="i-t" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.500"/></symbol></svg>
 
 <nav id="nav"><div class="nv"><a class="lgo" href="#top" aria-label="DMK Youth Wing home"><img class="em" src="img/7612479d5c.webp" alt="DMK Youth Wing emblem" width="50" height="50"><img class="wm" src="img/ab3254aea6.webp" alt="DMK YW" width="65" height="36"></a>
-<div class="lk" id="lk"><a class="on" href="#top">Home</a><a href="#mission">About</a><a href="#voices">Our Leader</a><a href="#works">Our Works</a><a href="#news">News</a><!-- YW START --><a href="#yw">Youth Wing</a><!-- YW END --><a href="#foot">Resources</a><button class="pill jn m-jn">Join Youthwing →</button></div>
+<div class="lk" id="lk"><a class="on" href="#top">Home</a><a href="#mission">About</a><a href="#voices">Our Leader</a><a href="#works">Our Works</a><a href="#news">News</a><!-- YW START --><a href="#yw">YouthWing</a><!-- YW END --><a href="#foot">Resources</a><button class="pill jn m-jn">Join Youthwing →</button></div>
 <button id="bg" aria-label="Menu">☰</button><button class="pill jn">Join Youthwing →</button></div></nav>
 
 <header class="hero"><div class="in1">
@@ -542,7 +542,7 @@ const ytId=u=>((u||'').match(/(?:youtu\.be\/|[?&]v=|\/live\/|\/shorts\/|\/embed\
 function cool(k,sec){const now=Date.now(),last=+localStorage.getItem('yw_rl_'+k)||0;if(now-last<sec*1000)return false;localStorage.setItem('yw_rl_'+k,now);return true}
 function msg(el,t,ok){el.className='yw-msg '+(ok?'yw-good':'yw-bad');el.textContent=t}
 const phoneOk=p=>/^(\+?91)?[6-9]\d{9}$/.test((p||'').replace(/[\s-]/g,''));
-const head=(title,em,lead,crumb)=>'<div class="yw-crumb"><a href="#yw">Youth Wing</a>'+(crumb?' › <span>'+esc(crumb)+'</span>':'')+'</div><h1 class="yw-h1">'+title+(em?' <em>'+em+'</em>':'')+'</h1>'+(lead?'<p class="yw-lead">'+lead+'</p>':'');
+const head=(title,em,lead,crumb)=>'<div class="yw-crumb"><a href="#yw">YouthWing</a>'+(crumb?' › <span>'+esc(crumb)+'</span>':'')+'</div><h1 class="yw-h1">'+title+(em?' <em>'+em+'</em>':'')+'</h1>'+(lead?'<p class="yw-lead">'+lead+'</p>':'');
 const loading='<div class="yw-empty">Loading…</div>';
 const fail=e=>'<div class="yw-empty">Could not load right now. '+esc(e.message||'')+'</div>';
 
@@ -559,7 +559,7 @@ function feedCard(f,i){
 /* ---------- Social-style post (YW Feeds timeline) ---------- */
 function ago(d){const s=(Date.now()-new Date(d))/1000;if(s<86400)return 'Today';const n=Math.floor(s/86400);return n===1?'Yesterday':n<7?n+' days ago':n<30?Math.floor(n/7)+'w ago':fdate(d)}
 function postCard(f,i){
-  const who=f.members||'Youth Wing',ini=esc(who.trim()[0]||'Y'),hue=[0,350,12,20,4,355][(who.charCodeAt(0)||0)%6];
+  const who=f.members||'YouthWing',ini=esc(who.trim()[0]||'Y'),hue=[0,350,12,20,4,355][(who.charCodeAt(0)||0)%6];
   const pics=(f.photos||[]).map(safeUrl).filter(Boolean),imgs=pics.length?pics:[ph(f.activity,ICON[f.activity_id],i)];
   const liked=(JSON.parse(localStorage.getItem('yw_likes')||'[]')).includes(f.id);
   return '<article class="yw-post" style="animation-delay:'+(i%6)*70+'ms"><header class="yw-ph2"><span class="yw-ava" style="background:hsl('+hue+',80%,42%)">'+ini+'</span><div class="yw-who"><b>'+esc(who)+
@@ -807,7 +807,7 @@ async function vAdmin(tab){
 }
 
 
-const NAVS=[['','Youth Wing'],['feeds','YW Feeds'],['podcast','Podcast'],['books','Bookshelf'],['leaderboard','Leaderboard'],['complaints','Complaints'],['ideas','Ideas']];
+const NAVS=[['','YouthWing'],['feeds','YW Feeds'],['podcast','Podcast'],['books','Bookshelf'],['leaderboard','Leaderboard'],['complaints','Complaints'],['ideas','Ideas']];
 function ywNav(view){
   let n=document.getElementById('yw-lk');
   if(!n){const lk=document.getElementById('lk');if(!lk)return;n=document.createElement('div');n.id='yw-lk';n.className='yw-lk';
