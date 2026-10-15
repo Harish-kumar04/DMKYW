@@ -69,12 +69,12 @@ nav.sc{box-shadow:0 6px 24px #0001}
 section{padding:70px 0}
 h2{margin:6px 0 26px;font:700 clamp(28px,3.6vw,46px)/1.15 Poppins}h2 em{color:var(--red);font-style:normal}
 /* voices */
-.vs{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
-.pc{position:relative;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 10px 30px #0001;cursor:zoom-in;transition:transform .35s,box-shadow .35s;border:0;padding:0;text-align:left;color:inherit;font:inherit}
+.vs{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;align-items:start}
+.pc{position:relative;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 10px 30px #0001;cursor:zoom-in;transition:transform .35s,box-shadow .35s;border:0;padding:0;text-align:left;color:inherit;font:inherit;aspect-ratio:700/1125}
 .pc:hover{transform:translateY(-10px) rotate(-1deg);box-shadow:0 22px 44px #d70f0a33}
-.pc img{display:block;width:100%;aspect-ratio:989/1589;object-fit:cover}
-.pc .pl{position:absolute;right:10px;top:10px;width:30px;height:30px;border-radius:50%;background:var(--red);color:#fff;font:600 20px/30px Poppins;text-align:center;box-shadow:0 4px 10px #0004;transition:transform .3s}.pc:hover .pl{transform:rotate(90deg)}.hl{position:absolute;left:0;right:0;bottom:0;padding:46px 14px 14px;background:linear-gradient(to top,#140706f2 62%,#14070600);color:#fff;transform:translateY(101%);transition:transform .4s}.pc:hover .hl,.pc:focus-visible .hl{transform:none}.hl b{display:block;font:600 13px Poppins;margin-bottom:6px;color:#ffb3ac}.hl ul{margin:0;padding:0;list-style:none;font:400 12px/1.4 Poppins}.hl li{position:relative;padding-left:13px;margin-bottom:5px}.hl li:before{content:'';position:absolute;left:0;top:6px;width:6px;height:6px;border-radius:50%;background:var(--red)}@media(hover:none){.hl{display:none}}
-@media(max-width:900px){.vs{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:14px;padding-bottom:14px}.pc{flex:0 0 68%;scroll-snap-align:center}}
+.pc img{display:block;width:100%;height:100%;aspect-ratio:700/1125;object-fit:cover}
+.pc .pl{position:absolute;right:10px;top:10px;width:30px;height:30px;border-radius:50%;background:var(--red);color:#fff;font:600 20px/30px Poppins;text-align:center;box-shadow:0 4px 10px #0004;transition:transform .3s;z-index:2}.pc:hover .pl{transform:rotate(90deg)}.hl{position:absolute;left:0;right:0;bottom:0;padding:46px 14px 14px;background:linear-gradient(to top,#140706f2 62%,#14070600);color:#fff;transform:translateY(101%);transition:transform .4s;z-index:1}.pc:hover .hl,.pc:focus-visible .hl{transform:none}.hl b{display:block;font:600 13px Poppins;margin-bottom:6px;color:#ffb3ac}.hl ul{margin:0;padding:0;list-style:none;font:400 12px/1.4 Poppins}.hl li{position:relative;padding-left:13px;margin-bottom:5px}.hl li:before{content:'';position:absolute;left:0;top:6px;width:6px;height:6px;border-radius:50%;background:var(--red)}@media(hover:none){.hl{display:none}}
+@media(max-width:900px){.vs{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:14px;padding-bottom:14px;align-items:flex-start;-webkit-overflow-scrolling:touch}.pc{flex:0 0 min(68vw,280px);max-width:280px;scroll-snap-align:center}}
 /* works */
 .wk{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
 .wc{background:#fff;border-radius:16px;box-shadow:0 8px 26px #0001;overflow:hidden;transition:transform .3s}.wc:hover{transform:translateY(-6px)}
@@ -159,11 +159,11 @@ textarea{resize:vertical;min-height:72px}input.bad,select.bad,textarea.bad{borde
 
 <section id="voices"><div class="wrap"><div class="k rv">Our leaders and ideas</div><h2 class="rv">Ideas that <em>move</em> people</h2>
 <div class="vs">
-<button class="pc rv" data-i="0"><img alt="Social Justice poster: skateboarding" src="img/335427b2c3.webp" loading="lazy" decoding="async" width="700" height="1125"><span class="pl" aria-hidden="true">+</span><div class="hl"></div></button>
-<button class="pc rv d1" data-i="1"><img alt="State Rights poster: surfing a red wave" src="img/1c63236e57.webp" loading="lazy" decoding="async" width="700" height="1124"><span class="pl" aria-hidden="true">+</span><div class="hl"></div></button>
-<button class="pc rv d2" data-i="2"><img alt="The GOAT poster: a bat smashing a ball labelled Inequality" src="img/91be28e95e.webp" loading="lazy" decoding="async" width="700" height="1124"><span class="pl" aria-hidden="true">+</span><div class="hl"></div></button>
-<button class="pc rv d3" data-i="3"><img alt="The Statesman as leader poster" src="img/354f1f2e12.webp" loading="lazy" decoding="async" width="700" height="1124"><span class="pl" aria-hidden="true">+</span><div class="hl"></div></button>
-<button class="pc rv d4" data-i="4"><img id="g5" alt="The One, Youthwing leader poster" src="img/7fce29eab2.webp" loading="lazy" decoding="async" width="700" height="1124"><span class="pl" aria-hidden="true">+</span><div class="hl"></div></button>
+<button class="pc rv" data-i="0" type="button"><img alt="Social Justice poster: skateboarding" src="img/335427b2c3.webp" loading="lazy" decoding="async"><span class="pl" aria-hidden="true">+</span><div class="hl"></div></button>
+<button class="pc rv d1" data-i="1" type="button"><img alt="State Rights poster: surfing a red wave" src="img/1c63236e57.webp" loading="lazy" decoding="async"><span class="pl" aria-hidden="true">+</span><div class="hl"></div></button>
+<button class="pc rv d2" data-i="2" type="button"><img alt="The GOAT poster: a bat smashing a ball labelled Inequality" src="img/91be28e95e.webp" loading="lazy" decoding="async"><span class="pl" aria-hidden="true">+</span><div class="hl"></div></button>
+<button class="pc rv d3" data-i="3" type="button"><img alt="The Statesman as leader poster" src="img/354f1f2e12.webp" loading="lazy" decoding="async"><span class="pl" aria-hidden="true">+</span><div class="hl"></div></button>
+<button class="pc rv d4" data-i="4" type="button"><img id="g5" alt="The One, Youthwing leader poster" src="img/7fce29eab2.webp" loading="lazy" decoding="async"><span class="pl" aria-hidden="true">+</span><div class="hl"></div></button>
 </div></div></section>
 
 <section id="works" style="background:var(--soft)"><div class="wrap"><div class="k rv">Our works</div><h2 class="rv">From ground to <em>greater change</em></h2>
