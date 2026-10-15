@@ -74,20 +74,33 @@ addEventListener('hashchange', route);
 // ---------- Dashboard ----------
 VIEWS.dashboard = async () => {
   V.innerHTML = '<h1 class="pg">Dashboard</h1><p class="pg-sub">Live counts from the database.</p><div class="stats">' + '<div class="stat"><div class="skel"></div></div>'.repeat(8) + '</div>';
-  const s = await api.rpc('yw_admin_stats');
-  const sum = o => Object.values(o || {}).reduce((a, b) => a + b, 0);
-  const card = (n, label, sub, href) => `<a class="stat" href="${href}" style="text-decoration:none"><b>${(+n || 0).toLocaleString('en-IN')}</b><span>${esc(label)}</span>${sub ? `<small>${esc(sub)}</small>` : ''}</a>`;
+  let s = {};
+  try { s = await api.rpc('yw_admin_stats'); } catch {
+    // Not authenticated — load what's publicly readable
+    try {
+      const [books, eps, feeds] = await Promise.all([
+        fetch(`${cfg.url}/rest/v1/yw_books?select=id&published=eq.true`, { headers: { apikey: cfg.anonKey, 'Content-Type': 'application/json', Prefer: 'count=exact', Range: '0-0' } }),
+        fetch(`${cfg.url}/rest/v1/yw_podcast_episodes?select=id&published=eq.true`, { headers: { apikey: cfg.anonKey, 'Content-Type': 'application/json', Prefer: 'count=exact', Range: '0-0' } }),
+        fetch(`${cfg.url}/rest/v1/yw_feed_public?select=id`, { headers: { apikey: cfg.anonKey, 'Content-Type': 'application/json', Prefer: 'count=exact', Range: '0-0' } })
+      ]);
+      const cnt = r => +(r.headers.get('content-range') || '').split('/')[1] || 0;
+      s = { books: cnt(books), episodes: cnt(eps), feeds_published: cnt(feeds), members: '—', kit_requests: '—', complaints: {}, ideas: {}, feeds_draft: '—', points_awarded: '—', top_districts: [], members_30d: '—' };
+    } catch { s = {}; }
+  }
+  const sum = o => typeof o === 'object' && o ? Object.values(o).reduce((a, b) => a + b, 0) : (o || 0);
+  const card = (n, label, sub, href) => `<a class="stat" href="${href}" style="text-decoration:none"><b>${String(n) === '—' ? '—' : (+n || 0).toLocaleString('en-IN')}</b><span>${esc(label)}</span>${sub ? `<small>${esc(sub)}</small>` : ''}</a>`;
   V.innerHTML = '<h1 class="pg">Dashboard</h1><p class="pg-sub">Live counts from the database.</p><div class="stats">' +
-    card(s.members, 'Registered members', `+${s.members_30d} in last 30 days`, '#/members') +
+    card(s.members, 'Registered members', s.members_30d !== undefined ? `+${s.members_30d} in last 30 days` : '', '#/members') +
     card(s.kit_requests, 'Kit requests', '', '#/members') +
-    card(sum(s.complaints), 'Complaints', `${(s.complaints || {}).New || 0} new · ${(s.complaints || {})['In review'] || 0} in review`, '#/complaints') +
-    card(sum(s.ideas), 'Ideas', `${(s.ideas || {}).Pending || 0} pending review`, '#/ideas') +
-    card(s.feeds_published, 'Published feeds', `${s.feeds_draft} drafts`, '#/feeds') +
+    card(sum(s.complaints), 'Complaints', `${(s.complaints || {}).New || 0} new`, '#/complaints') +
+    card(sum(s.ideas), 'Ideas', `${(s.ideas || {}).Pending || 0} pending`, '#/ideas') +
+    card(s.feeds_published, 'Published feeds', s.feeds_draft !== undefined ? `${s.feeds_draft} drafts` : '', '#/feeds') +
     card(s.episodes, 'Podcast episodes', '', '#/podcast') +
     card(s.books, 'Bookshelf entries', '', '#/books') +
-    card(s.points_awarded, 'Points awarded', 'excluding reversed', '#/leaderboard') + '</div>' +
-    '<h2>Top districts by members</h2><div class="tbl-wrap"><table><tr><th>District</th><th>Members</th></tr>' +
-    ((s.top_districts || []).map(d => `<tr><td>${esc(d.district)}</td><td>${d.n}</td></tr>`).join('') || '<tr><td colspan="2" class="empty">No members yet.</td></tr>') + '</table></div>';
+    card(s.points_awarded, 'Points awarded', '', '#/leaderboard') + '</div>' +
+    (s.top_districts && s.top_districts.length ?
+      '<h2>Top districts by members</h2><div class="tbl-wrap"><table><tr><th>District</th><th>Members</th></tr>' +
+      s.top_districts.map(d => `<tr><td>${esc(d.district)}</td><td>${d.n}</td></tr>`).join('') + '</table></div>' : '');
 };
 
 // ---------- Generic data view (members / complaints / ideas) with filters + export ----------
