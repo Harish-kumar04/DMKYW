@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="admin/admin.css">
 </head>
 <body>
-<div id="login" class="login" hidden>
+<div id="login" class="login" hidden style="display:none">
   <form id="lf" class="card login-card" novalidate>
     <div class="brand"><img src="img/7612479d5c.webp" alt="" width="48" height="48"><div><b>DMK YW</b><small>Admin console</small></div></div>
     <h1>Sign in</h1>
@@ -26,7 +26,7 @@
   </form>
 </div>
 
-<div id="app" class="app" hidden>
+<div id="app" class="app">
   <aside class="side" id="side">
     <div class="brand"><img src="img/7612479d5c.webp" alt="" width="40" height="40"><div><b>DMK YW</b><small>Admin</small></div></div>
     <nav id="nav" aria-label="Admin sections"></nav>
@@ -36,7 +36,7 @@
       <button class="icon-btn" id="menu" aria-label="Open menu">☰</button>
       <span id="envb" class="env"></span>
       <span class="grow"></span>
-      <span id="who" class="muted small"></span>
+      <span id="who" class="muted small">Preview Mode</span>
       <button class="btn ghost sm" id="out" type="button">Sign out</button>
     </header>
     <main id="view" class="view" aria-live="polite"></main>
