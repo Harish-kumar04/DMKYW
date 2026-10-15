@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin | DMK YouthWing</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'none'; form-action 'none'">
+<link rel="icon" type="image/webp" href="img/7612479d5c.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Anton&family=Noto+Sans+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin/admin.css">
+</head>
+<body>
+<div id="login" class="login" hidden>
+  <form id="lf" class="card login-card" novalidate>
+    <div class="brand"><img src="img/7612479d5c.webp" alt="" width="48" height="48"><div><b>DMK YW</b><small>Admin console</small></div></div>
+    <h1>Sign in</h1>
+    <p class="muted">Only authorised YouthWing administrators.</p>
+    <label>Email<input id="le" type="email" autocomplete="username" required></label>
+    <label>Password<input id="lp" type="password" autocomplete="current-password" required></label>
+    <div id="lm" class="msg" role="alert"></div>
+    <button class="btn" type="submit" id="lb">Sign in</button>
+    <a class="muted small" href="/">← Back to website</a>
+  </form>
+</div>
+
+<div id="app" class="app" hidden>
+  <aside class="side" id="side">
+    <div class="brand"><img src="img/7612479d5c.webp" alt="" width="40" height="40"><div><b>DMK YW</b><small>Admin</small></div></div>
+    <nav id="nav" aria-label="Admin sections"></nav>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <button class="icon-btn" id="menu" aria-label="Open menu">☰</button>
+      <span id="envb" class="env"></span>
+      <span class="grow"></span>
+      <span id="who" class="muted small"></span>
+      <button class="btn ghost sm" id="out" type="button">Sign out</button>
+    </header>
+    <main id="view" class="view" aria-live="polite"></main>
+  </div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<dialog id="drawer" class="drawer"><div id="dw"></div></dialog>
+<script type="module" src="admin/app.mjs"></script>
+</body>
+</html>

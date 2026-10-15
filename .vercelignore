@@ -1,0 +1,5 @@
+# Not deployed to the website
+tests/
+*.sql
+README_ADMIN.md
+.env.example

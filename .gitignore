@@ -1,0 +1,9 @@
+# Secrets / local config (never commit)
+.env
+.env.*
+!.env.example
+admin/config.local.mjs
+# Exports must never be committed
+*.xlsx
+*.csv
+node_modules/
