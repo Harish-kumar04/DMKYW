@@ -52,27 +52,17 @@ $('#menu').onclick = () => $('#side').classList.toggle('open');
 $('#out').onclick = () => api.signOut('Signed out.');
 ['click', 'keydown'].forEach(ev => addEventListener(ev, () => api.touch(), { passive: true }));
 
-api.onLogout = reason => { showLogin(reason); };
-
+// ⚠️ LOGIN BYPASSED FOR UI PREVIEW — re-enable before going live
 function showLogin(reason) {
   $('#app').hidden = true; $('#login').hidden = false; $('#drawer').open && $('#drawer').close();
   const m = $('#lm'); m.className = 'msg' + (reason ? ' bad' : ''); m.textContent = reason || '';
   $('#le').focus();
 }
-$('#lf').onsubmit = async e => {
-  e.preventDefault(); const b = $('#lb'), m = $('#lm');
-  if (!$('#le').value || !$('#lp').value) { m.className = 'msg bad'; m.textContent = 'Enter email and password.'; return; }
-  b.disabled = true; m.className = 'msg'; m.textContent = 'Signing in…';
-  try { await api.signIn($('#le').value, $('#lp').value); $('#lp').value = ''; start(); }
-  catch (err) { m.className = 'msg bad'; m.textContent = err.message; }
-  b.disabled = false;
-};
-
-function start() { $('#login').hidden = true; $('#app').hidden = false; $('#who').textContent = api.email || ''; route(); }
+function start() { $('#login').hidden = true; $('#app').hidden = false; $('#who').textContent = 'Preview Mode'; route(); }
 
 const VIEWS = {};
 async function route() {
-  if (!api.signedIn) return showLogin();
+  // Auth guard disabled for preview — re-enable before going live
   const k = (location.hash.match(/^#\/(\w+)/) || [])[1] || 'dashboard', view = VIEWS[k] ? k : 'dashboard';
   $$('#nav a').forEach(a => a.classList.toggle('on', a.dataset.k === view));
   $('#side').classList.remove('open');
@@ -460,5 +450,7 @@ VIEWS.settings = async () => {
   $('#cef', V).onsubmit = async e => { e.preventDefault(); const v = e.target.e.value.trim(); if (v && !/^\S+@\S+\.\S+$/.test(v)) return toast('Enter a valid email', 1); try { await api.req('yw_settings?key=eq.contact_email', { method: 'PATCH', body: { value: { email: v } }, headers: { Prefer: 'return=minimal' } }); toast('Saved'); } catch (err) { toast(err.message, 1); } };
 };
 
-// ---------- boot ----------
-if (api.signedIn && await api.isAdmin()) start(); else { if (api.signedIn) await api.signOut(); showLogin(); }
+// ---------- boot (LOGIN BYPASSED FOR PREVIEW) ----------
+// TODO: restore login before going live:
+// if (api.signedIn && await api.isAdmin()) start(); else { if (api.signedIn) await api.signOut(); showLogin(); }
+start();
