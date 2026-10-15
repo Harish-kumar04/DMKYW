@@ -13,20 +13,28 @@
 <link rel="stylesheet" href="admin/admin.css">
 </head>
 <body>
-<div id="login" class="login" hidden style="display:none">
+<div id="login" class="login">
   <form id="lf" class="card login-card" novalidate>
     <div class="brand"><img src="img/7612479d5c.webp" alt="" width="48" height="48"><div><b>DMK YW</b><small>Admin console</small></div></div>
     <h1>Sign in</h1>
     <p class="muted">Only authorised YouthWing administrators.</p>
     <label>Email<input id="le" type="email" autocomplete="username" required></label>
-    <label>Password<input id="lp" type="password" autocomplete="current-password" required></label>
+    <label>Password
+      <div class="pw-wrap">
+        <input id="lp" type="password" autocomplete="current-password" required>
+        <button type="button" class="pw-toggle" aria-label="Show password" data-for="lp">👁️</button>
+      </div>
+    </label>
+    <div style="display:flex;justify-content:flex-end">
+      <button type="button" class="link-btn small" id="btn-forgot">Forgot password?</button>
+    </div>
     <div id="lm" class="msg" role="alert"></div>
     <button class="btn" type="submit" id="lb">Sign in</button>
     <a class="muted small" href="/">← Back to website</a>
   </form>
 </div>
 
-<div id="app" class="app">
+<div id="app" class="app" hidden>
   <aside class="side" id="side">
     <div class="brand"><img src="img/7612479d5c.webp" alt="" width="40" height="40"><div><b>DMK YW</b><small>Admin</small></div></div>
     <nav id="nav" aria-label="Admin sections"></nav>
@@ -35,15 +43,137 @@
     <header class="top">
       <button class="icon-btn" id="menu" aria-label="Open menu">☰</button>
       <span id="envb" class="env"></span>
+      <span id="pwb" class="pw-pill" style="display:none"></span>
       <span class="grow"></span>
-      <span id="who" class="muted small">Preview Mode</span>
+      <span id="who" class="muted small"></span>
       <button class="btn ghost sm" id="out" type="button">Sign out</button>
     </header>
     <main id="view" class="view" aria-live="polite"></main>
   </div>
 </div>
+
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <dialog id="drawer" class="drawer"><div id="dw"></div></dialog>
+
+<!-- Mandatory renewal dialog when 14-day expiry reached -->
+<dialog id="renew-dialog" class="center-modal">
+  <div class="center-modal-inner">
+    <div class="brand"><img src="img/7612479d5c.webp" alt="" width="36" height="36"><div><b>DMK YW</b><small>Security Policy</small></div></div>
+    <h2 style="margin:0;font-size:20px">Password Expired</h2>
+    <p class="muted small" style="margin:0">Youth Wing security policy requires passwords to be renewed every 14 days. Please choose a new strong password to continue.</p>
+    <form id="renew-form" class="form" novalidate>
+      <label>Current password
+        <div class="pw-wrap">
+          <input id="renew-old" type="password" autocomplete="current-password" required>
+          <button type="button" class="pw-toggle" aria-label="Show password" data-for="renew-old">👁️</button>
+        </div>
+      </label>
+      <label>New password (min 15 chars)
+        <div class="pw-wrap">
+          <input id="renew-new" type="password" autocomplete="new-password" required minlength="15">
+          <button type="button" class="pw-toggle" aria-label="Show password" data-for="renew-new">👁️</button>
+        </div>
+      </label>
+      <label>Confirm new password
+        <div class="pw-wrap">
+          <input id="renew-confirm" type="password" autocomplete="new-password" required minlength="15">
+          <button type="button" class="pw-toggle" aria-label="Show password" data-for="renew-confirm">👁️</button>
+        </div>
+      </label>
+      <div id="renew-rules" class="pw-rules">
+        <ul>
+          <li id="rr-len">At least 15 characters</li>
+          <li id="rr-dict">Not a common or easily guessed password</li>
+          <li id="rr-user">Does not contain your email username</li>
+          <li id="rr-match">Passwords match</li>
+        </ul>
+      </div>
+      <div id="renew-msg" class="msg" role="alert"></div>
+      <div class="row" style="justify-content:space-between">
+        <button type="button" class="btn ghost sm" id="renew-cancel">Sign out</button>
+        <button class="btn sm" type="submit" id="renew-submit">Renew &amp; Continue</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<!-- Forgot password / Recovery dialog -->
+<dialog id="recover-dialog" class="center-modal">
+  <div class="center-modal-inner">
+    <h2 style="margin:0;font-size:20px">Reset Admin Password</h2>
+    <p class="muted small" style="margin:0">Enter your administrator email address. If an administrative account exists, a secure password reset link will be sent.</p>
+    <form id="recover-form" class="form" novalidate>
+      <label>Administrator Email
+        <input id="recover-email" type="email" autocomplete="email" required>
+      </label>
+      <div id="recover-msg" class="msg" role="alert"></div>
+      <div class="row" style="justify-content:space-between">
+        <button type="button" class="btn ghost sm" id="recover-cancel">Back</button>
+        <button class="btn sm" type="submit" id="recover-submit">Send Recovery Link</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<!-- Reset with recovery link dialog -->
+<dialog id="reset-dialog" class="center-modal">
+  <div class="center-modal-inner">
+    <h2 style="margin:0;font-size:20px">Set New Password</h2>
+    <p class="muted small" style="margin:0">Your recovery token has been verified. Enter a new strong password (minimum 15 characters).</p>
+    <form id="reset-form" class="form" novalidate>
+      <label>New password (min 15 chars)
+        <div class="pw-wrap">
+          <input id="reset-new" type="password" autocomplete="new-password" required minlength="15">
+          <button type="button" class="pw-toggle" aria-label="Show password" data-for="reset-new">👁️</button>
+        </div>
+      </label>
+      <label>Confirm new password
+        <div class="pw-wrap">
+          <input id="reset-confirm" type="password" autocomplete="new-password" required minlength="15">
+          <button type="button" class="pw-toggle" aria-label="Show password" data-for="reset-confirm">👁️</button>
+        </div>
+      </label>
+      <div id="reset-msg" class="msg" role="alert"></div>
+      <div class="row" style="justify-content:flex-end">
+        <button class="btn sm" type="submit" id="reset-submit">Update Password</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<!-- In-session Change Password dialog (from Settings) -->
+<dialog id="change-dialog" class="center-modal">
+  <div class="center-modal-inner">
+    <h2 style="margin:0;font-size:20px">Change Password</h2>
+    <p class="muted small" style="margin:0">Changing your password resets your 14-day expiration clock. Minimum 15 characters required.</p>
+    <form id="change-form" class="form" novalidate>
+      <label>Current password
+        <div class="pw-wrap">
+          <input id="chg-old" type="password" autocomplete="current-password" required>
+          <button type="button" class="pw-toggle" aria-label="Show password" data-for="chg-old">👁️</button>
+        </div>
+      </label>
+      <label>New password (min 15 chars)
+        <div class="pw-wrap">
+          <input id="chg-new" type="password" autocomplete="new-password" required minlength="15">
+          <button type="button" class="pw-toggle" aria-label="Show password" data-for="chg-new">👁️</button>
+        </div>
+      </label>
+      <label>Confirm new password
+        <div class="pw-wrap">
+          <input id="chg-confirm" type="password" autocomplete="new-password" required minlength="15">
+          <button type="button" class="pw-toggle" aria-label="Show password" data-for="chg-confirm">👁️</button>
+        </div>
+      </label>
+      <div id="change-msg" class="msg" role="alert"></div>
+      <div class="row" style="justify-content:space-between">
+        <button type="button" class="btn ghost sm" id="change-cancel">Cancel</button>
+        <button class="btn sm" type="submit" id="change-submit">Save Password</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
 <script type="module" src="admin/app.mjs"></script>
 </body>
 </html>

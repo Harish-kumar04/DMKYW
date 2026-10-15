@@ -1,5 +1,5 @@
 // DMK YouthWing admin console. Vanilla ES modules, no build step.
-import { createClient } from './api.mjs';
+import { createClient, validatePassword, COMMON_PASSWORDS } from './api.mjs';
 import { DATASETS, DISTRICTS, buildQuery, fetchAll, exportFilename, cleanSearch } from './query.mjs';
 import { toCSV, toXLSX, prepareRows, maskContact } from './export.mjs';
 import baseCfg from './config.mjs';
@@ -52,17 +52,59 @@ $('#menu').onclick = () => $('#side').classList.toggle('open');
 $('#out').onclick = () => api.signOut('Signed out.');
 ['click', 'keydown'].forEach(ev => addEventListener(ev, () => api.touch(), { passive: true }));
 
-// ⚠️ LOGIN BYPASSED FOR UI PREVIEW — re-enable before going live
 function showLogin(reason) {
-  $('#app').hidden = true; $('#login').hidden = false; $('#drawer').open && $('#drawer').close();
+  $('#app').hidden = true; $('#login').hidden = false;
+  ['#drawer', '#renew-dialog', '#recover-dialog', '#reset-dialog', '#change-dialog'].forEach(s => {
+    const el = $(s); if (el && el.open) el.close();
+  });
   const m = $('#lm'); m.className = 'msg' + (reason ? ' bad' : ''); m.textContent = reason || '';
   $('#le').focus();
 }
-function start() { $('#login').hidden = true; $('#app').hidden = false; $('#who').textContent = 'Preview Mode'; route(); }
+
+function updatePasswordPill(status) {
+  const b = $('#pwb');
+  if (!b) return;
+  if (!status || status.days_remaining === undefined) { b.style.display = 'none'; return; }
+  b.style.display = 'inline-flex';
+  const d = status.days_remaining;
+  if (d <= 1) {
+    b.className = 'pw-pill urgent'; b.textContent = `⚠️ Expires in ${d} day!`; b.title = 'Security policy: renew password immediately';
+  } else if (d <= 3) {
+    b.className = 'pw-pill warn'; b.textContent = `⚠️ ${d} days left`; b.title = 'Approaching 14-day password expiration';
+  } else if (d <= 7) {
+    b.className = 'pw-pill warn'; b.textContent = `ℹ️ ${d} days left`; b.title = '14-day password expiration active';
+  } else {
+    b.className = 'pw-pill ok'; b.textContent = `🔒 ${d}d left`; b.title = 'Password valid';
+  }
+  b.style.cursor = 'pointer';
+  b.onclick = () => openChangePasswordModal();
+}
+
+function start(status) {
+  $('#login').hidden = true;
+  $('#app').hidden = false;
+  $('#who').textContent = api.email || 'Admin';
+  if (status) updatePasswordPill(status);
+  route();
+}
+
+function showPasswordRenewal(status) {
+  $('#app').hidden = true; $('#login').hidden = true;
+  const d = $('#renew-dialog'); if (!d.open) d.showModal();
+  $('#renew-msg').textContent = 'Your password has reached the mandatory 14-day limit. Choose a new password to continue.';
+  $('#renew-msg').className = 'msg bad';
+  $('#renew-old').value = ''; $('#renew-new').value = ''; $('#renew-confirm').value = '';
+}
+
+function openChangePasswordModal() {
+  $('#chg-old').value = ''; $('#chg-new').value = ''; $('#chg-confirm').value = '';
+  $('#change-msg').textContent = '';
+  const d = $('#change-dialog'); if (!d.open) d.showModal();
+}
 
 const VIEWS = {};
 async function route() {
-  // Auth guard disabled for preview — re-enable before going live
+  if (!api.signedIn) { showLogin(); return; }
   const k = (location.hash.match(/^#\/(\w+)/) || [])[1] || 'dashboard', view = VIEWS[k] ? k : 'dashboard';
   $$('#nav a').forEach(a => a.classList.toggle('on', a.dataset.k === view));
   $('#side').classList.remove('open');
@@ -494,17 +536,285 @@ VIEWS.activity = async () => {
 
 // ---------- Settings ----------
 VIEWS.settings = async () => {
-  const [acts, ce, admins] = await Promise.all([api.req('yw_activity_types?select=*&order=sort'), api.req('yw_settings?key=eq.contact_email&select=value'), api.req('yw_admins?select=email,added_at&order=added_at')]);
+  const [acts, ce, admins, status] = await Promise.all([
+    api.req('yw_activity_types?select=*&order=sort'),
+    api.req('yw_settings?key=eq.contact_email&select=value'),
+    api.req('yw_admins?select=email,added_at&order=added_at'),
+    api.getAdminStatus()
+  ]);
+
+  const daysLeft = status.days_remaining !== undefined ? status.days_remaining : 14;
+  const daysBadge = daysLeft <= 1 ? chip(`${daysLeft} days (Urgent)`, 'sample')
+                  : daysLeft <= 3 ? chip(`${daysLeft} days (Warning)`, 'Pending')
+                  : daysLeft <= 7 ? chip(`${daysLeft} days`, 'Pending')
+                  : chip(`${daysLeft} days`, 'Done');
+
   V.innerHTML = `<h1 class="pg">Settings</h1><p class="pg-sub">Points apply to feeds published after the change.</p>
-  <div class="two"><div class="card"><b>Points table</b><div class="tbl-wrap" style="margin-top:10px"><table>${acts.map(a => `<tr><td>${esc(a.name)}</td><td style="width:110px"><input type="number" min="0" max="100" value="${a.points}" data-pt="${a.id}"></td></tr>`).join('')}</table></div><p><button class="btn" id="sp" type="button">Save points</button></p></div>
-  <div><form class="card form" id="cef"><b>Contact email for feed submissions</b><label>Email<input name="e" type="email" value="${esc(ce[0] && ce[0].value && ce[0].value.email)}"></label><div><button class="btn" type="submit">Save</button></div></form>
-  <div class="card" style="margin-top:16px"><b>Administrators</b><div class="tbl-wrap" style="margin-top:10px"><table>${admins.map(a => `<tr><td>${esc(a.email)}</td><td class="muted small">${fdate(a.added_at)}</td></tr>`).join('')}</table></div>
-  <p class="muted small">For security, administrators are added only from the Supabase SQL editor by the project owner (see README_ADMIN.md). Accounts are never promoted automatically.</p></div></div></div>`;
+  <div class="two">
+    <div>
+      <div class="card">
+        <b>Points table</b>
+        <div class="tbl-wrap" style="margin-top:10px"><table>${acts.map(a => `<tr><td>${esc(a.name)}</td><td style="width:110px"><input type="number" min="0" max="100" value="${a.points}" data-pt="${a.id}"></td></tr>`).join('')}</table></div>
+        <p><button class="btn" id="sp" type="button">Save points</button></p>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <b>Security &amp; Password Management</b>
+        <p class="muted small" style="margin-top:4px">Mandatory 14-day password expiration policy is active on the server.</p>
+        <div class="tbl-wrap" style="margin-top:10px">
+          <table>
+            <tr><td><b>Current account</b></td><td>${esc(api.email || '—')}</td></tr>
+            <tr><td><b>Password last changed</b></td><td>${status.password_changed_at ? fdate(status.password_changed_at, 1) : 'Recently'}</td></tr>
+            <tr><td><b>Password expires on</b></td><td>${status.password_expires_at ? fdate(status.password_expires_at, 1) : 'In ' + daysLeft + ' days'}</td></tr>
+            <tr><td><b>Days remaining</b></td><td>${daysBadge}</td></tr>
+            <tr><td><b>Enforcement</b></td><td><span class="chip Done">Server RLS active</span></td></tr>
+          </table>
+        </div>
+        <p style="margin-top:14px"><button class="btn sm" id="btn-settings-chg-pw" type="button">Change password now</button></p>
+      </div>
+    </div>
+
+    <div>
+      <form class="card form" id="cef">
+        <b>Contact email for feed submissions</b>
+        <label>Email<input name="e" type="email" value="${esc(ce[0] && ce[0].value && ce[0].value.email)}"></label>
+        <div><button class="btn" type="submit">Save</button></div>
+      </form>
+      <div class="card" style="margin-top:16px">
+        <b>Administrators</b>
+        <div class="tbl-wrap" style="margin-top:10px"><table>${admins.map(a => `<tr><td>${esc(a.email)}</td><td class="muted small">${fdate(a.added_at)}</td></tr>`).join('')}</table></div>
+        <p class="muted small">For security, administrators are added only from the Supabase SQL editor by the project owner (see README_ADMIN.md). Accounts are never promoted automatically.</p>
+      </div>
+    </div>
+  </div>`;
+
+  $('#btn-settings-chg-pw', V).onclick = () => openChangePasswordModal();
   $('#sp', V).onclick = async () => { try { for (const i of $$('[data-pt]', V)) { const v = Math.max(0, Math.min(100, parseInt(i.value, 10) || 0)); await api.req('yw_activity_types?id=' + eq(i.dataset.pt), { method: 'PATCH', body: { points: v }, headers: { Prefer: 'return=minimal' } }); } toast('Points saved'); } catch (e) { toast(e.message, 1); } };
   $('#cef', V).onsubmit = async e => { e.preventDefault(); const v = e.target.e.value.trim(); if (v && !/^\S+@\S+\.\S+$/.test(v)) return toast('Enter a valid email', 1); try { await api.req('yw_settings?key=eq.contact_email', { method: 'PATCH', body: { value: { email: v } }, headers: { Prefer: 'return=minimal' } }); toast('Saved'); } catch (err) { toast(err.message, 1); } };
 };
 
-// ---------- boot (LOGIN BYPASSED FOR PREVIEW) ----------
-// TODO: restore login before going live:
-// if (api.signedIn && await api.isAdmin()) start(); else { if (api.signedIn) await api.signOut(); showLogin(); }
-start();
+// ---------- Password UI interactions & Dialog handlers ----------
+// 1. Eye toggle for password fields
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.pw-toggle');
+  if (!btn) return;
+  const targetId = btn.dataset.for;
+  const input = $('#' + targetId);
+  if (!input) return;
+  const isPw = input.type === 'password';
+  input.type = isPw ? 'text' : 'password';
+  btn.textContent = isPw ? '🙈' : '👁️';
+  btn.setAttribute('aria-label', isPw ? 'Hide password' : 'Show password');
+});
+
+// 2. Real-time checklist helper
+function bindPasswordRules(newInput, confirmInput, rulesRoot, userEmail) {
+  const check = () => {
+    const val = newInput.value, conf = confirmInput ? confirmInput.value : '';
+    const email = userEmail || api.email || '';
+    const handle = email.split('@')[0].toLowerCase().trim();
+    const lenEl = $('#rr-len', rulesRoot), dictEl = $('#rr-dict', rulesRoot), userEl = $('#rr-user', rulesRoot), matchEl = $('#rr-match', rulesRoot);
+    if (lenEl) { lenEl.className = val.length >= 15 ? 'ok' : (val.length ? 'fail' : ''); }
+    if (dictEl) { dictEl.className = val && !COMMON_PASSWORDS.has(val.toLowerCase()) ? 'ok' : (val ? 'fail' : ''); }
+    if (userEl) { userEl.className = val && !(handle.length >= 3 && val.toLowerCase().includes(handle)) ? 'ok' : (val ? 'fail' : ''); }
+    if (matchEl) { matchEl.className = conf && conf === val ? 'ok' : (conf ? 'fail' : ''); }
+  };
+  newInput.addEventListener('input', check);
+  if (confirmInput) confirmInput.addEventListener('input', check);
+}
+
+// 3. Login form submission
+$('#lf').onsubmit = async e => {
+  e.preventDefault();
+  const email = $('#le').value.trim();
+  const password = $('#lp').value;
+  const m = $('#lm'), btn = $('#lb');
+  if (!email || !password) {
+    m.className = 'msg bad';
+    m.textContent = 'Please enter both email and password.';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+  m.textContent = '';
+  try {
+    await api.signIn(email, password);
+    const status = await api.getAdminStatus();
+    if (status.is_expired) {
+      $('#lp').value = '';
+      showPasswordRenewal(status);
+    } else {
+      $('#lp').value = '';
+      start(status);
+    }
+  } catch (err) {
+    m.className = 'msg bad';
+    m.textContent = err.message || 'Sign-in failed.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sign in';
+  }
+};
+
+// 4. Forgot password request
+$('#btn-forgot').onclick = () => {
+  $('#recover-email').value = $('#le').value.trim();
+  $('#recover-msg').textContent = '';
+  $('#recover-dialog').showModal();
+};
+$('#recover-cancel').onclick = () => $('#recover-dialog').close();
+$('#recover-form').onsubmit = async e => {
+  e.preventDefault();
+  const email = $('#recover-email').value.trim();
+  const msg = $('#recover-msg'), btn = $('#recover-submit');
+  btn.disabled = true; btn.textContent = 'Sending...';
+  try {
+    const res = await api.requestPasswordRecovery(email);
+    msg.className = 'msg good';
+    msg.textContent = res.message;
+    setTimeout(() => { $('#recover-dialog').close(); toast('Recovery instructions sent.'); }, 2500);
+  } catch (err) {
+    msg.className = 'msg bad';
+    msg.textContent = err.message || 'Request failed.';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Send Recovery Link';
+  }
+};
+
+// 5. Mandatory renewal form
+$('#renew-cancel').onclick = () => {
+  $('#renew-dialog').close();
+  api.signOut('Signed out.');
+};
+$('#renew-form').onsubmit = async e => {
+  e.preventDefault();
+  const oldPw = $('#renew-old').value;
+  const newPw = $('#renew-new').value;
+  const confirmPw = $('#renew-confirm').value;
+  const msg = $('#renew-msg'), btn = $('#renew-submit');
+  if (newPw !== confirmPw) {
+    msg.className = 'msg bad';
+    msg.textContent = 'New passwords do not match.';
+    return;
+  }
+  const v = validatePassword(newPw, api.email);
+  if (!v.valid) {
+    msg.className = 'msg bad';
+    msg.textContent = v.errors.join(' ');
+    return;
+  }
+  btn.disabled = true; btn.textContent = 'Renewing...';
+  try {
+    await api.renewExpiredPassword(oldPw, newPw);
+    toast('Password renewed! 14-day clock reset.');
+    $('#renew-dialog').close();
+    const st = await api.getAdminStatus();
+    start(st);
+  } catch (err) {
+    msg.className = 'msg bad';
+    msg.textContent = err.message || 'Password renewal failed.';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Renew & Continue';
+  }
+};
+bindPasswordRules($('#renew-new'), $('#renew-confirm'), $('#renew-rules'));
+
+// 6. In-session change password form
+$('#change-cancel').onclick = () => $('#change-dialog').close();
+$('#change-form').onsubmit = async e => {
+  e.preventDefault();
+  const oldPw = $('#chg-old').value;
+  const newPw = $('#chg-new').value;
+  const confirmPw = $('#chg-confirm').value;
+  const msg = $('#change-msg'), btn = $('#change-submit');
+  if (newPw !== confirmPw) {
+    msg.className = 'msg bad';
+    msg.textContent = 'New passwords do not match.';
+    return;
+  }
+  const v = validatePassword(newPw, api.email);
+  if (!v.valid) {
+    msg.className = 'msg bad';
+    msg.textContent = v.errors.join(' ');
+    return;
+  }
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    await api.changePassword(oldPw, newPw);
+    toast('Password changed successfully! 14-day clock reset.');
+    $('#change-dialog').close();
+    const st = await api.getAdminStatus();
+    updatePasswordPill(st);
+    if (location.hash === '#/settings') await VIEWS.settings();
+  } catch (err) {
+    msg.className = 'msg bad';
+    msg.textContent = err.message || 'Password change failed.';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save Password';
+  }
+};
+
+// 7. Reset password with recovery token (from email link)
+let recoveryAccessToken = null;
+function setupRecovery(token) {
+  recoveryAccessToken = token;
+  $('#login').hidden = true; $('#app').hidden = true;
+  $('#reset-dialog').showModal();
+}
+$('#reset-form').onsubmit = async e => {
+  e.preventDefault();
+  const newPw = $('#reset-new').value, confirmPw = $('#reset-confirm').value;
+  const msg = $('#reset-msg'), btn = $('#reset-submit');
+  if (newPw !== confirmPw) {
+    msg.className = 'msg bad'; msg.textContent = 'Passwords do not match.'; return;
+  }
+  btn.disabled = true; btn.textContent = 'Updating...';
+  try {
+    await api.resetPasswordWithRecovery(newPw, recoveryAccessToken);
+    toast('Password updated. Please sign in.');
+    $('#reset-dialog').close();
+    location.hash = '';
+    showLogin('Password updated. Please sign in with your new password.');
+  } catch (err) {
+    msg.className = 'msg bad'; msg.textContent = err.message || 'Password reset failed.';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Update Password';
+  }
+};
+
+// ---------- boot sequence ----------
+api.onLogout = reason => {
+  $('#pwb').style.display = 'none';
+  showLogin(reason);
+};
+
+async function boot() {
+  const hash = new URLSearchParams(location.hash.replace(/^#/, ''));
+  if (hash.get('type') === 'recovery' && hash.get('access_token')) {
+    setupRecovery(hash.get('access_token'));
+    return;
+  }
+
+  if (!api.signedIn) {
+    showLogin();
+    return;
+  }
+
+  try {
+    const status = await api.getAdminStatus();
+    if (!status.is_admin) {
+      await api.signOut('This account is not authorised as an administrator.');
+      showLogin('This account is not authorised as an administrator.');
+      return;
+    }
+    if (status.is_expired) {
+      showPasswordRenewal(status);
+      return;
+    }
+    start(status);
+  } catch (e) {
+    await api.signOut('Session verification failed.');
+    showLogin(e.message);
+  }
+}
+boot();
