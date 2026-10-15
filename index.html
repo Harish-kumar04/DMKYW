@@ -477,11 +477,12 @@ const L={
   ['Notebooks and story books for a village school','Members donated 200 notebooks and 60 story books to a primary school, and spent the afternoon reading stories with the children.','Thanjavur',3,18,'Keerthana']
  ].map((f,i)=>({id:'s'+i,title:f[0],description:f[1],district:f[2],activity_id:f[3],activity_date:dAgo(f[4]),members:f[5],photos:Array.isArray(f[6])?f[6]:[],is_sample:true,created_at:dAgo(f[4])})),
  eps:[
-  ['FDePiJkDURg','காலத்தின் நிறம் கருப்பு சிவப்பு நூல் வெளியீடு: திரு. பன்னீர் பெருமாள் அவர்களின் பேச்சுரை','திரு. பன்னீர் பெருமாள்',false],
-  ['7RSsijRK430','காலத்தின் நிறம் கருப்பு சிவப்பு நூல் வெளியீடு: வழக்கறிஞர் திருமதி அ. அருள்மொழி அவர்களின் பேச்சுரை','திருமதி அ. அருள்மொழி',false],
-  ['g8KoNBzhNo8','காலத்தின் நிறம் கருப்பு சிவப்பு: எழுத்தாளர் வே. மதிமாறன் அவர்களின் கட்டுரை','வே. மதிமாறன்',false],
-  ['ZvC-hpSpK2c','Live: திமுக75 அறிவுத்திருவிழாவில் காலத்தின் நிறம் கருப்பு சிவப்பு நூல் வெளியீடு, சிறப்புரை','',true]
- ].map((e,i)=>({id:'e'+i,category:'general',title:e[1],speaker:e[2],ep_date:null,thumbnail:'https://i.ytimg.com/vi/'+e[0]+'/hqdefault.jpg',youtube:e[3]?'https://www.youtube.com/live/'+e[0]:'https://youtu.be/'+e[0],spotify:null,instagram:null,is_live:e[3]})),
+  ['pSS4aWEoDEw','தேவை பிரதமர் நாற்காலியல்ல; இந்தியா முழுமைக்கும் சமூகநீதி | ஜெயரஞ்சன் | Jeyaranjan |','Jeyaranjan',false,'book'],
+  ['FDePiJkDURg','காலத்தின் நிறம் கருப்பு சிவப்பு நூல் வெளியீடு: திரு. பன்னீர் பெருமாள் அவர்களின் பேச்சுரை','திரு. பன்னீர் பெருமாள்',false,'general'],
+  ['7RSsijRK430','காலத்தின் நிறம் கருப்பு சிவப்பு நூல் வெளியீடு: வழக்கறிஞர் திருமதி அ. அருள்மொழி அவர்களின் பேச்சுரை','திருமதி அ. அருள்மொழி',false,'general'],
+  ['g8KoNBzhNo8','காலத்தின் நிறம் கருப்பு சிவப்பு: எழுத்தாளர் வே. மதிமாறன் அவர்களின் கட்டுரை','வே. மதிமாறன்',false,'general'],
+  ['ZvC-hpSpK2c','Live: திமுக75 அறிவுத்திருவிழாவில் காலத்தின் நிறம் கருப்பு சிவப்பு நூல் வெளியீடு, சிறப்புரை','',true,'general']
+ ].map((e,i)=>({id:'e'+i,category:e[4]||'general',title:e[1],speaker:e[2],ep_date:null,thumbnail:'https://i.ytimg.com/vi/'+e[0]+'/hqdefault.jpg',youtube:e[3]?'https://www.youtube.com/live/'+e[0]:'https://youtu.be/'+e[0],spotify:null,instagram:null,is_live:e[3]})),
  books:[
   ['Kalathin Niram: Karuppu Sivappu','Tho. Paramasivan','An acclaimed Tamil novel on identity, colour and society.','Beginner','Tamil Literature','https://www.panuval.com/kalathin-niram-karuppu-sivappu-10028476','https://assets2.panuval.com/image/cache/catalog/1003/kalathin-niram-karuppu-sivappu-10028476-250x250h.jpeg'],
   ['தீ பரவட்டும்','முகமது யூசுப்','திராவிட இயக்க வரலாற்றின் தீ நிறைந்த பக்கங்கள்.','Beginner','History','https://dravidianbookhouse.com/product/%e0%ae%a4%e0%af%80-%e0%ae%aa%e0%ae%b0%e0%ae%b5%e0%ae%9f%e0%af%8d%e0%ae%9f%e0%af%81%e0%ae%ae%e0%af%8d/','https://dravidianbookhouse.com/wp-content/uploads/2015/07/Thee_paravattum_front.png'],
@@ -548,8 +549,9 @@ const fail=e=>'<div class="yw-empty">Could not load right now. '+esc(e.message||
 
 /* ---------- Feed card ---------- */
 function feedCard(f,i){
-  const img=(f.photos&&f.photos[0])?safeUrl(f.photos[0]):ph(f.activity,ICON[f.activity_id],i);
-  return '<article class="yw-item" style="animation-delay:'+(i%6)*60+'ms"><div class="yw-ph"><img loading="lazy" alt="'+esc(f.title)+'" src="'+esc(img)+'"><span class="yw-ptop">+'+esc(f.points)+' Points</span>'+(f.photos&&f.photos.length>1?'<span class="yw-more">+'+(f.photos.length-1)+' photos</span>':'')+'</div>'+
+  const yt=safeUrl(f.video_url),vid=ytId(yt);
+  const img=(f.photos&&f.photos[0])?safeUrl(f.photos[0]):(vid?'https://i.ytimg.com/vi/'+vid+'/hqdefault.jpg':ph(f.activity,ICON[f.activity_id],i));
+  return '<article class="yw-item" style="animation-delay:'+(i%6)*60+'ms"><div class="yw-ph"><img loading="lazy" alt="'+esc(f.title)+'" src="'+esc(img)+'"><span class="yw-ptop">+'+esc(f.points)+' Points</span>'+(vid?'<span class="yw-chip yw-live" style="position:absolute;bottom:8px;left:8px">▶ Video</span>':'')+(f.photos&&f.photos.length>1?'<span class="yw-more">+'+(f.photos.length-1)+' photos</span>':'')+'</div>'+
   '<div class="yw-body"><h3>'+esc(f.title)+'</h3><p>'+esc(f.description)+'</p><div class="yw-meta">'+
   (f.is_sample?'<span class="yw-chip yw-sample">Sample</span>':'')+'<span class="yw-chip yw-pts">+'+esc(f.points)+' pts</span><span class="yw-chip">'+esc(f.activity)+'</span><span class="yw-chip">📍 '+esc(f.district)+'</span>'+
   (f.members?'<span class="yw-chip">👤 '+esc(f.members)+'</span>':'')+'<span class="yw-chip">📅 '+fdate(f.activity_date)+'</span></div></div></article>';
@@ -560,14 +562,20 @@ function feedCard(f,i){
 function ago(d){const s=(Date.now()-new Date(d))/1000;if(s<86400)return 'Today';const n=Math.floor(s/86400);return n===1?'Yesterday':n<7?n+' days ago':n<30?Math.floor(n/7)+'w ago':fdate(d)}
 function postCard(f,i){
   const who=f.members||'YouthWing',ini=esc(who.trim()[0]||'Y'),hue=[0,350,12,20,4,355][(who.charCodeAt(0)||0)%6];
-  const pics=(f.photos||[]).map(safeUrl).filter(Boolean),imgs=pics.length?pics:[ph(f.activity,ICON[f.activity_id],i)];
+  const yt=safeUrl(f.video_url),vid=ytId(yt);
+  const pics=(f.photos||[]).map(safeUrl).filter(Boolean);
+  const imgs=pics.length?pics:(vid?[]:[ph(f.activity,ICON[f.activity_id],i)]);
   const liked=(JSON.parse(localStorage.getItem('yw_likes')||'[]')).includes(f.id);
+  const videoHtml = vid ? '<div class="yw-video-box" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;margin:12px 0;background:#000;"><iframe src="https://www.youtube-nocookie.com/embed/'+vid+'" title="'+esc(f.title)+'" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>' : '';
+  const imgHtml = imgs.length ? '<div class="yw-pimg yw-n'+Math.min(imgs.length,4)+'">'+imgs.slice(0,4).map(u=>'<img loading="lazy" alt="'+esc(f.title)+'" src="'+esc(u)+'">').join('')+'</div>' : '';
+
   return '<article class="yw-post" style="animation-delay:'+(i%6)*70+'ms"><header class="yw-ph2"><span class="yw-ava" style="background:hsl('+hue+',80%,42%)">'+ini+'</span><div class="yw-who"><b>'+esc(who)+
   ' <span class="yw-vf" title="Youth Wing member">✔</span></b><small>📍 '+esc(f.district)+' · '+esc(ago(f.activity_date))+'</small></div><span class="yw-ppt">+'+esc(f.points)+' pts</span></header>'+
-  '<div class="yw-ptx"><span class="yw-tag">#'+esc(f.activity.replace(/[^A-Za-z]+/g,''))+'</span>'+(f.is_sample?' <span class="yw-chip yw-sample">Sample</span>':'')+'<h3>'+esc(f.title)+'</h3><p>'+esc(f.description)+'</p></div>'+
-  '<div class="yw-pimg yw-n'+Math.min(imgs.length,4)+'">'+imgs.slice(0,4).map(u=>'<img loading="lazy" alt="'+esc(f.title)+'" src="'+esc(u)+'">').join('')+'</div>'+
+  '<div class="yw-ptx"><span class="yw-tag">#'+esc(f.activity.replace(/[^A-Za-z]+/g,''))+'</span>'+(f.is_sample?' <span class="yw-chip yw-sample">Sample</span>':'')+(vid?' <span class="yw-chip yw-live">▶ Video</span>':'')+'<h3>'+esc(f.title)+'</h3><p>'+esc(f.description)+'</p></div>'+
+  videoHtml + imgHtml +
   '<div class="yw-pstat"><span>★ '+esc(f.points)+' points credited to '+esc(who)+'</span><span>'+fdate(f.activity_date)+'</span></div>'+
   '<footer class="yw-pact"><button type="button" class="yw-like'+(liked?' yw-liked':'')+'" data-id="'+esc(f.id)+'">👍 <span>'+(liked?'Liked':'Like')+'</span></button>'+
+  (yt?'<a class="yw-btn yw-yt" target="_blank" rel="noopener" href="'+esc(yt)+'">▶ YouTube</a>':'')+
   '<button type="button" class="yw-share" data-t="'+esc(f.title)+'">↗ Share</button><a href="#yw/leaderboard">🏆 Leaderboard</a></footer></article>';
 }
 function bindPosts(el){
@@ -607,20 +615,27 @@ async function vFeeds(){
       q('#yw-mail').innerHTML='<div class="yw-form"><b>Did your team do something great?</b><span>Email the details to the Youth Wing team. Once verified, it is published here and points are credited.</span><div><a class="pill" href="mailto:'+esc(em)+'?subject='+encodeURIComponent('YW Feed: activity details')+'&body='+encodeURIComponent(body)+'">Email your activity →</a></div></div>'}}catch(_){}
 }
 async function vPodcast(sub){
-  sub=sub==='book'?'book':'general';
+  sub=(sub==='book'||sub==='general')?sub:'';
   V.innerHTML=head('YW','Podcast','Conversations on books, our history, our mission and our work.','Podcast')+'<div id="yw-spk"></div>'+
-  '<div class="yw-tabs"><a class="yw-tab'+(sub==='book'?' yw-on':'')+'" href="#yw/podcast/book">Book Discussions</a><a class="yw-tab'+(sub==='general'?' yw-on':'')+'" href="#yw/podcast/general">General Discussions</a></div>'+
+  '<div class="yw-tabs"><a class="yw-tab'+(!sub||sub==='all'?' yw-on':'')+'" href="#yw/podcast">All Videos</a><a class="yw-tab'+(sub==='book'?' yw-on':'')+'" href="#yw/podcast/book">Book Discussions</a><a class="yw-tab'+(sub==='general'?' yw-on':'')+'" href="#yw/podcast/general">General Discussions</a></div>'+
   '<div class="yw-grid" id="yw-eps">'+loading+'</div><h2 class="yw-h2">Become a Speaker</h2>'+
   '<form class="yw-form" id="yw-sf" novalidate><div class="yw-row2"><label>Name<input name="n" maxlength="80" autocomplete="name"></label><label>Phone<input name="p" inputmode="tel" maxlength="14" autocomplete="tel"></label></div>'+
   '<div class="yw-row2"><label>District<select name="d">'+opts(DIST,'Select district')+'</select></label><label>College<input name="c" maxlength="120"></label></div>'+
   '<label>Sample link (optional)<input name="l" type="url" maxlength="300" placeholder="https://"></label><div class="yw-msg" id="yw-sm"></div><div><button class="pill" type="submit">Apply to speak</button></div></form>';
   api('yw_settings?key=eq.speaker_month&select=value').then(s=>{const v=s[0]&&s[0].value;if(!v)return;const l=safeUrl(v.link||'');
     q('#yw-spk').innerHTML='<div class="yw-spk"><div class="yw-av">🎤</div><div><small>Speaker of the Month</small><b>'+esc(v.name)+'</b><p>'+esc(v.about)+'</p>'+(l?'<p><a class="yw-btn yw-yt" target="_blank" rel="noopener" href="'+esc(l)+'">Watch</a></p>':'')+'</div></div>'}).catch(()=>{});
-  try{const r=await api('yw_podcast_episodes?select=*&category=eq.'+sub+'&order=ep_date.desc.nullslast,title.asc');
-    q('#yw-eps').innerHTML=r.length?r.map((e,i)=>{const yt=safeUrl(e.youtube),sp=safeUrl(e.spotify),ig=safeUrl(e.instagram),th=safeUrl(e.thumbnail)||(ytId(yt)?'https://i.ytimg.com/vi/'+ytId(yt)+'/hqdefault.jpg':ph(e.title,'🎙️',i));
-      return '<article class="yw-item" style="animation-delay:'+i*60+'ms"><div class="yw-ph"><img loading="lazy" alt="'+esc(e.title)+'" src="'+esc(th)+'"></div><div class="yw-body"><h3>'+esc(e.title)+'</h3>'+
-      '<div class="yw-meta" style="margin-top:0;padding-top:0">'+(e.is_live?'<span class="yw-chip yw-live">● Live stream</span>':'')+(e.speaker?'<span class="yw-chip">🎤 '+esc(e.speaker)+'</span>':'')+(e.ep_date?'<span class="yw-chip">📅 '+fdate(e.ep_date)+'</span>':'')+'</div>'+
-      '<div class="yw-btns">'+(yt?'<a class="yw-btn yw-yt" target="_blank" rel="noopener" href="'+esc(yt)+'">▶ YouTube</a>':'')+(sp?'<a class="yw-btn yw-sp" target="_blank" rel="noopener" href="'+esc(sp)+'">Spotify</a>':'')+(ig?'<a class="yw-btn yw-ig" target="_blank" rel="noopener" href="'+esc(ig)+'">Instagram</a>':'')+'</div></div></article>'}).join(''):'<div class="yw-empty">Episodes coming soon.</div>'}
+  const qPath='yw_podcast_episodes?select=*'+(sub?'&category=eq.'+sub:'')+'&order=ep_date.desc.nullslast,created_at.desc,title.asc';
+  try{const r=await api(qPath);
+    q('#yw-eps').innerHTML=r.length?r.map((e,i)=>{
+      const yt=safeUrl(e.youtube),sp=safeUrl(e.spotify),ig=safeUrl(e.instagram),vid=ytId(yt);
+      const th=safeUrl(e.thumbnail)||(vid?'https://i.ytimg.com/vi/'+vid+'/hqdefault.jpg':ph(e.title,'🎙️',i));
+      return '<article class="yw-item" style="animation-delay:'+i*60+'ms"><div class="yw-ph" data-yt="'+esc(vid)+'" style="position:relative;cursor:'+(vid?'pointer':'default')+'"><img loading="lazy" alt="'+esc(e.title)+'" src="'+esc(th)+'">'+
+      (vid?'<div class="yw-ply" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);"><svg width="44" height="44" viewBox="0 0 68 48"><path fill="#f00" d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55c-2.93.78-4.63 3.26-5.42 6.19C.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z"/><polygon fill="#fff" points="45,24 27,14 27,34"/></svg></div>':'')+
+      '</div><div class="yw-body"><h3>'+esc(e.title)+'</h3>'+
+      '<div class="yw-meta" style="margin-top:0;padding-top:0">'+(e.is_live?'<span class="yw-chip yw-live">● Live stream</span>':'')+(e.speaker?'<span class="yw-chip">🎤 '+esc(e.speaker)+'</span>':'')+(e.ep_date?'<span class="yw-chip">📅 '+fdate(e.ep_date)+'</span>':'')+'<span class="yw-chip">'+esc(e.category==='book'?'Book Discussion':'General')+'</span></div>'+
+      '<div class="yw-btns">'+(yt?'<a class="yw-btn yw-yt" target="_blank" rel="noopener" href="'+esc(yt)+'">▶ YouTube</a>':'')+(sp?'<a class="yw-btn yw-sp" target="_blank" rel="noopener" href="'+esc(sp)+'">Spotify</a>':'')+(ig?'<a class="yw-btn yw-ig" target="_blank" rel="noopener" href="'+esc(ig)+'">Instagram</a>':'')+'</div></div></article>'}).join(''):'<div class="yw-empty">Episodes coming soon.</div>';
+    qa('#yw-eps .yw-ph[data-yt]').forEach(p=>{const v=p.dataset.yt;if(!v)return;p.onclick=()=>{p.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(v)+'?autoplay=1" style="width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'}});
+  }
   catch(e){q('#yw-eps').innerHTML=fail(e)}
   const f=q('#yw-sf');f.onsubmit=async ev=>{ev.preventDefault();const m=q('#yw-sm'),n=f.n.value.trim(),p=f.p.value.trim(),d=f.d.value,l=f.l.value.trim();
     if(n.length<2)return msg(m,'Enter your name.');if(!phoneOk(p))return msg(m,'Enter a valid 10-digit mobile number.');if(!d)return msg(m,'Select your district.');if(l&&!safeUrl(l))return msg(m,'Sample link must start with https://');
