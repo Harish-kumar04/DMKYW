@@ -34,7 +34,7 @@ export function createClient({ url, anonKey, fetch: f = globalThis.fetch.bind(gl
       storage.setItem('yw_admin_lock', JSON.stringify(lock));
       throw new Error('Sign-in failed. Check your email and password.'); // generic: no account enumeration
     }
-    if (!(await isAdmin())) { await signOut(); throw new Error('This account is not an administrator.'); }
+    if (!(await isAdmin())) { await signOut(); throw new Error('This account is not authorised as an administrator. Add your user to yw_admins table in Supabase.'); }
     return session.email;
   }
 
@@ -66,7 +66,15 @@ export function createClient({ url, anonKey, fetch: f = globalThis.fetch.bind(gl
   }
 
   const rpc = (fn, args) => req('rpc/' + fn, { method: 'POST', body: args || {} });
-  async function isAdmin() { try { return (await rpc('yw_am_admin')) === true; } catch { return false; } }
+  async function isAdmin() {
+    try { return (await rpc('yw_am_admin')) === true; }
+    catch (e) {
+      // Surface setup errors clearly
+      if (e.message && e.message.includes('404')) throw new Error('Database setup incomplete: run yw_features.sql in Supabase SQL Editor first.');
+      if (e.message && (e.message.includes('yw_am_admin') || e.message.includes('does not exist'))) throw new Error('Database setup incomplete: run yw_features.sql in Supabase SQL Editor first.');
+      return false;
+    }
+  }
 
   /** One page + exact total count (server-side pagination). */
   async function page(path, from, size) {
