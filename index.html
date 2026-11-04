@@ -38,12 +38,23 @@ nav.sc{box-shadow:0 6px 24px #0001}
 .q{font:700 clamp(15px,1.4vw,21px)/1.45 'Mukta Malar';margin:12px 0 16px;max-width:460px}
 .btns{display:flex;gap:12px;flex-wrap:wrap;margin:4px 0 16px}
 .btns .pill{padding:13px 26px}
-.fig{position:relative;justify-self:end;width:min(38vw,480px);max-height:calc(100vh - 130px);max-height:calc(100dvh - 130px);aspect-ratio:4/5;overflow:hidden;border-radius:24px;box-shadow:14px 14px 0 var(--red),0 25px 60px #0002;margin:0 10px 16px 0}
-.fig img{width:100%;height:100%;object-fit:cover;object-position:28% 40%;display:block;transition:transform .5s ease}
+.fig{position:relative;justify-self:end;width:min(38vw,480px);max-height:calc(100vh - 130px);max-height:calc(100dvh - 130px);aspect-ratio:4/5;overflow:hidden;border-radius:24px;box-shadow:14px 14px 0 var(--red),0 25px 60px #0002;margin:0 10px 16px 0;user-select:none}
+.fig-track{display:flex;width:100%;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.fig-track::-webkit-scrollbar{display:none}
+.fig-slide{flex:0 0 100%;width:100%;height:100%;scroll-snap-align:start;scroll-snap-stop:always;position:relative;overflow:hidden}
+.fig-slide img{width:100%;height:100%;object-fit:cover;object-position:28% 40%;display:block;transition:transform .5s ease}
+.fig-arrow{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:#ffffffd0;color:var(--ink);border:0;font:700 22px/36px Poppins,sans-serif;text-align:center;cursor:pointer;z-index:3;box-shadow:0 4px 14px #0004;opacity:0;transition:opacity .25s,transform .2s,background .2s;backdrop-filter:blur(4px);padding:0}
+.fig:hover .fig-arrow,.fig:focus-within .fig-arrow{opacity:1}
+.fig-arrow.prev{left:10px}
+.fig-arrow.next{right:10px}
+.fig-arrow:hover{background:#fff;color:var(--red);transform:translateY(-50%) scale(1.08)}
+.fig-dots{position:absolute;bottom:12px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:7px;z-index:3;pointer-events:none}
+.fig-dot{width:8px;height:8px;border-radius:999px;background:#ffffff99;border:0;padding:0;cursor:pointer;pointer-events:auto;transition:all .3s ease;box-shadow:0 2px 6px #0005}
+.fig-dot.on{width:22px;background:#fff;box-shadow:0 2px 8px #0007}
 .in1>*{animation:up .5s cubic-bezier(.16,1,.3,1) both}
 .in1>*:nth-child(1){animation-delay:.04s}.in1>*:nth-child(2){animation-delay:.08s}.in1>*:nth-child(3){animation-delay:.12s}.in1>*:nth-child(4){animation-delay:.16s}.in1>*:nth-child(5){animation-delay:.2s}
 @keyframes up{from{transform:translateY(12px)}to{transform:none}}
-@media(max-width:900px){.hero{grid-template-columns:minmax(0,1fr);padding:84px 5vw 24px;gap:20px;min-height:auto;align-items:flex-start}.in1{min-width:0}.fig{justify-self:center;width:min(88vw,380px);max-height:44vh;aspect-ratio:4/4.5;box-shadow:10px 10px 0 var(--red),0 16px 36px #0002;margin:0 auto 16px;border-radius:20px}.fig img{width:100%;height:100%;object-fit:cover;object-position:28% 40%;display:block;transition:transform .5s ease}.pill{min-height:46px}#bg{min-width:46px;min-height:46px}}
+@media(max-width:900px){.hero{grid-template-columns:minmax(0,1fr);padding:84px 5vw 24px;gap:20px;min-height:auto;align-items:flex-start}.in1{min-width:0}.fig{justify-self:center;width:min(88vw,380px);max-height:44vh;aspect-ratio:4/4.5;box-shadow:10px 10px 0 var(--red),0 16px 36px #0002;margin:0 auto 16px;border-radius:20px}.fig-slide img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}.fig-arrow{opacity:.85;width:32px;height:32px;font-size:18px;line-height:32px}.pill{min-height:46px}#bg{min-width:46px;min-height:46px}}
 @media(max-width:600px){.hero{padding:80px 4vw 20px;gap:16px}.chip{font-size:13px;padding:4px 10px;margin-bottom:6px}.tm{font-size:clamp(28px,7.5vw,38px);line-height:1.1}.tm2{font-size:clamp(18px,4.8vw,24px);line-height:1.15}.sc2{margin:10px 0 0;font-size:12px;letter-spacing:.35em}.ld{font-size:clamp(40px,11vw,58px)}.q{margin:10px 0 12px;font-size:16px}.btns{margin:4px 0 14px;gap:10px}.btns .pill{padding:12px 18px;font-size:13.5px;flex:1 1 auto;justify-content:center;text-align:center}.fig{width:min(92vw,340px);max-height:38vh;margin:0 auto 12px}}
 /* strip + stats */
 .strip{position:relative;z-index:2;margin:-24px auto 0;max-width:1240px;width:90vw;background:#fff;border-radius:22px;box-shadow:0 18px 50px #0002;display:grid;grid-template-columns:repeat(4,1fr);padding:22px 10px}
@@ -146,7 +157,20 @@ textarea{resize:vertical;min-height:72px}input.bad,select.bad,textarea.bad{borde
 <h1 class="h1"><span class="chip">The One</span><span class="tm">நாளைய நம்பிக்கை!</span><span class="tm2">இன்றைய இளந்தலைவர்</span><span class="sc2">Youthwing</span><span class="ld"><i>L</i>EADER</span><svg class="bs" viewBox="0 0 420 22" aria-hidden="true"><path d="M4 14C90 4 250 2 416 10"/></svg></h1>
 <p class="q">“வெல்வோம் ஒன்றாக!”</p>
 <div class="btns"><button class="pill jn">Join Youthwing →</button><a class="pill out" href="#mission">Our Vision ›</a></div></div>
-<div class="fig"><img id="hi" alt="Speaker at a podium addressing a gathering" decoding="async" fetchpriority="high" width="900" height="990" src="img/47f7dd82a8.webp"></div></header>
+<div class="fig" id="hero-fig" aria-label="Youth Wing Leader photo gallery">
+  <div class="fig-track" id="fig-track">
+    <div class="fig-slide" data-idx="0"><img id="hi" alt="Youth Wing Leader speaking at a podium" decoding="async" fetchpriority="high" width="900" height="990" src="img/47f7dd82a8.webp" style="object-position:28% 40%"></div>
+    <div class="fig-slide" data-idx="1"><img alt="Youth Wing Leader addressing a massive youth gathering" loading="lazy" decoding="async" width="1024" height="682" src="img/hero-rally.webp" style="object-position:35% 20%"></div>
+    <div class="fig-slide" data-idx="2"><img alt="Youth Wing Leader interacting at a press meet" loading="lazy" decoding="async" width="1024" height="693" src="img/hero-press.webp" style="object-position:50% 20%"></div>
+  </div>
+  <button class="fig-arrow prev" type="button" aria-label="Previous photo">‹</button>
+  <button class="fig-arrow next" type="button" aria-label="Next photo">›</button>
+  <div class="fig-dots" role="tablist" aria-label="Gallery slides">
+    <button class="fig-dot on" type="button" role="tab" aria-selected="true" aria-label="Slide 1"></button>
+    <button class="fig-dot" type="button" role="tab" aria-selected="false" aria-label="Slide 2"></button>
+    <button class="fig-dot" type="button" role="tab" aria-selected="false" aria-label="Slide 3"></button>
+  </div>
+</div></header>
 
 <div class="strip rv"><div><svg class="ic"><use href="#i-p"/></svg><span><b>Youth empowerment</b><small>Create opportunities for every youth</small></span></div><div><svg class="ic"><use href="#i-b"/></svg><span><b>People first</b><small>Listen, learn, act for the people</small></span></div><div><svg class="ic"><use href="#i-t"/></svg><span><b>Social impact</b><small>From ideas to real change</small></span></div><div><svg class="ic"><use href="#i-p"/></svg><span><b>Stronger tomorrow</b><small>Inclusive, progressive and united</small></span></div></div>
 <div class="stats rv"><div><div class="n" data-n="45" data-s="+">0</div><small>Years since 1980</small></div><div><div class="n" data-n="500000" data-s="+">0</div><small>Youth at Salem 2024</small></div><div><div class="n" data-n="5000000" data-s="+">0</div><small>NEET signatures</small></div><div><div class="n" data-n="11" data-p="₹" data-s=" lakh">0</div><small>Raised for Anbagam</small></div><a class="go" href="#works" aria-label="See our works">→</a></div>
