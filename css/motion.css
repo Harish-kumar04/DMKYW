@@ -1,0 +1,152 @@
+/* ==========================================================================
+   DMK YW: motion layer
+   Loaded AFTER the inline <style> in index.html, so it can refine it.
+   Rules (from the ui-ux-pro-max skill):
+   - animate transform / opacity (+ individual translate/scale/rotate) only
+   - every animated rule lives inside prefers-reduced-motion: no-preference
+   - one-shot or interaction-driven motion; no decorative infinite loops
+   - parallax only on decorative layers, never on body copy
+   ========================================================================== */
+
+:root{
+  --ym-out:cubic-bezier(.16,1,.3,1);          /* decelerate: things arriving */
+  --ym-spring:cubic-bezier(.34,1.56,.64,1);   /* small overshoot: badges, icons */
+  --ym-gold:#FFC600;
+}
+
+/* Scroll progress bar (functional, not decorative; JS drives scaleX) */
+.ym-progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:60;pointer-events:none;
+  background:linear-gradient(90deg,var(--red),var(--ym-gold));transform-origin:0 50%;transform:scaleX(0)}
+
+@media (prefers-reduced-motion:no-preference){
+
+/* ---------- keyframes ---------- */
+@keyframes ymPop{from{scale:.55;opacity:0}to{scale:1;opacity:1}}
+@keyframes ymWipe{from{clip-path:inset(-12% 100% -12% -2%)}to{clip-path:inset(-12% -6% -12% -2%)}}
+@keyframes ymSlide{from{opacity:0;translate:-26px 0}to{opacity:1;translate:0 0}}
+@keyframes ymRise{from{opacity:0;translate:0 38px;filter:blur(8px)}to{opacity:1;translate:0 0;filter:none}}
+@keyframes ymFig{from{translate:46px 0}to{translate:0 0}}
+@keyframes ymZoom{from{scale:1.14}to{scale:1}}
+@keyframes ymNav{from{translate:0 -100%}to{translate:0 0}}
+@keyframes ymRing{from{box-shadow:0 0 0 0 #d70f0a66,0 8px 20px #d70f0a40}to{box-shadow:0 0 0 18px #d70f0a00,0 8px 20px #d70f0a40}}
+@keyframes ymRingW{from{box-shadow:0 0 0 0 #ffffffaa}to{box-shadow:0 0 0 18px #fff0}}
+@keyframes ymDlg{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes ymBackdrop{from{opacity:0}to{opacity:1}}
+
+/* ---------- page load: nav + hero sequence (~1.3s total) ---------- */
+nav{animation:ymNav .7s var(--ym-out) backwards}
+.chip{animation:ymPop .6s .05s var(--ym-spring) backwards}
+.h1 .tm{animation:ymWipe .7s .15s var(--ym-out) backwards}
+.h1 .tm2{animation:ymWipe .7s .3s var(--ym-out) backwards}
+.h1 .sc2{animation:ymSlide .6s .42s var(--ym-out) backwards}
+.h1 .ld{animation:ymRise .8s .5s var(--ym-out) backwards}
+.bs path{animation-duration:.7s;animation-delay:.95s}
+.in1>.q{animation:ymSlide .6s .8s var(--ym-out) backwards}
+.in1>.btns{animation:ymRise .7s .9s var(--ym-out) backwards}
+/* primary CTA: two attention rings once the sequence has settled, then stops */
+.in1>.btns .pill:first-child{animation:ymRing 1.4s 1.9s ease-out 2}
+
+/* hero photo: frame slides in, first image settles from a slight zoom, hover pushes in */
+.fig{animation:ymFig .9s .15s var(--ym-out) backwards}
+#hi{animation:ymZoom 1.6s var(--ym-out) backwards}
+.fig-slide img{transition:transform .5s ease,scale 1.2s var(--ym-out)}
+.fig:hover .fig-slide img{scale:1.045}
+
+/* logo */
+.lgo .em{transition:rotate .5s var(--ym-spring),scale .4s var(--ym-out)}
+.lgo:hover .em{rotate:-12deg;scale:1.08}
+
+/* ---------- buttons: shine sweep + press feedback ---------- */
+.pill{position:relative;overflow:hidden;isolation:isolate}
+.pill:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(110deg,#fff0 30%,#ffffff59 50%,#fff0 70%);translate:-130% 0;transition:translate .8s var(--ym-out)}
+.pill:hover:before{translate:130% 0}
+.pill:active{transform:translateY(0) scale(.97);transition-duration:.1s}
+.cta .pill{overflow:visible}
+.cta.in .pill{animation:ymRingW 1.4s 1.4s ease-out 2}
+.cta .pill:before{display:none}
+
+/* ---------- scroll reveal: variants on top of the existing .rv / .in system ---------- */
+.pc.rv{transform:translateY(60px) scale(.9) rotate(3deg);transition:opacity .8s var(--ym-out),transform .9s var(--ym-spring),box-shadow .35s}
+.pc.rv.in{transform:none}
+.wc.rv{transform:translateY(54px) scale(.94);transition:opacity .8s var(--ym-out),transform .9s var(--ym-spring)}
+.wc.rv.in{transform:none}
+.nc.rv{transform:translateX(-44px);transition:opacity .8s var(--ym-out),transform .9s var(--ym-out)}
+.nc.rv.in{transform:none}
+.vc.rv{transform:translateX(-56px) rotate(-2deg);transition:opacity .8s var(--ym-out),transform 1s var(--ym-out)}
+.vc.rv.in{transform:none}
+.band.rv,.strip.rv,.stats.rv{transform:translateY(56px) scale(.97);transition:opacity .9s var(--ym-out),transform 1s var(--ym-out)}
+.band.rv.in,.strip.rv.in,.stats.rv.in{transform:none}
+
+/* Bug fix: the original `.rv.in{transform:none}` came later than the hover rules, so cards never
+   lifted on hover once revealed. motion.js adds .rvd after the entrance transition ends. */
+.rv.in.rvd{transition-delay:0s;transition-duration:.4s;transition-timing-function:var(--ym-out)}
+.pc.rv.in.rvd:hover{transform:translateY(-10px) rotate(-1deg)}
+.wc.rv.in.rvd:hover{transform:translateY(-8px)}
+.nc.rv.in.rvd:hover{transform:translateY(-5px)}
+.vc.rv.in.rvd:hover{transform:translateY(-6px)}
+
+/* headings: accent word gets an underline that draws in */
+h2.rv em{background:linear-gradient(var(--red),var(--red)) 0 94%/0% 4px no-repeat;padding-bottom:3px;
+  transition:background-size .9s .4s var(--ym-out)}
+h2.rv.in em{background-size:100% 4px}
+.rv .mh+i{transform-origin:left;scale:0 1;transition:scale .8s .5s var(--ym-out)}
+.rv.in .mh+i{scale:1 1}
+
+/* trust strip icons + stats underline */
+.strip.in .ic{animation:ymPop .6s var(--ym-spring) backwards}
+.strip.in div:nth-child(1) .ic{animation-delay:.25s}
+.strip.in div:nth-child(2) .ic{animation-delay:.38s}
+.strip.in div:nth-child(3) .ic{animation-delay:.51s}
+.strip.in div:nth-child(4) .ic{animation-delay:.64s}
+.stats small:after{transform-origin:left;scale:0 1;transition:scale .7s var(--ym-out)}
+.stats.in small:after{scale:1 1}
+.stats.in div:nth-child(1) small:after{transition-delay:.3s}
+.stats.in div:nth-child(2) small:after{transition-delay:.45s}
+.stats.in div:nth-child(3) small:after{transition-delay:.6s}
+.stats.in div:nth-child(4) small:after{transition-delay:.75s}
+.go{transition:transform .3s var(--ym-spring),box-shadow .3s}.go:hover{box-shadow:0 0 0 8px #d70f0a22}
+
+/* leader posters: image push-in + pointer parallax + soft spotlight (vars set by motion.js) */
+.pc img{transition:scale .6s var(--ym-out),translate .25s ease-out}
+.pc:hover img{scale:1.08;translate:var(--mx,0px) var(--my,0px)}
+.pc:after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .3s;
+  background:radial-gradient(220px circle at var(--x,50%) var(--y,50%),#ffffff4d,#fff0 65%)}
+.pc:hover:after{opacity:1}
+
+/* work cards: icon + arrow respond */
+.wc .ph .ic{transition:transform .45s var(--ym-spring)}
+.wc:hover .ph .ic{transform:translateY(-6px) rotate(-10deg) scale(1.08)}
+.wc .ph b{transition:transform .5s var(--ym-out),opacity .5s}
+.wc:hover .ph b{transform:translateX(-6px) scale(1.12);opacity:.5}
+.wc p>span:last-child{transition:transform .3s var(--ym-out)}
+.wc:hover p>span:last-child{transform:translateX(6px)}
+
+/* mission video card + ground photo */
+.vc img{transition:scale .9s var(--ym-out)}
+.vc:hover img{scale:1.07}
+.gp.rv img{scale:1.18;transition:scale 1.6s var(--ym-out)}
+.gp.rv.in img{scale:1}
+.pts li{transition:padding-left .3s var(--ym-out)}
+.pts li:hover{padding-left:30px}
+.rv.in .pts li{animation:ymSlide .6s var(--ym-out) backwards}
+.rv.in .pts li:nth-child(1){animation-delay:.35s}
+.rv.in .pts li:nth-child(2){animation-delay:.5s}
+.rv.in .pts li:nth-child(3){animation-delay:.65s}
+
+/* timeline year badges */
+.nc.rv.in i{animation:ymPop .6s .3s var(--ym-spring) backwards}
+
+/* decorative band: slow parallax on the image only (JS sets translate; scale keeps edges covered) */
+.band img{scale:1.2}
+
+/* closing CTA: quote lines arrive one by one (lines are split by motion.js) */
+.cta .ln{display:block;opacity:0;translate:-34px 0;
+  transition:opacity .7s var(--ym-out),translate .7s var(--ym-out);transition-delay:calc(var(--i,0) * .12s)}
+.cta.in .ln{opacity:1;translate:0 0}
+
+/* ---------- dialogs ---------- */
+dialog[open]{animation:ymDlg .4s var(--ym-out)}
+dialog[open]::backdrop{animation:ymBackdrop .3s ease-out}
+
+} /* end no-preference */
