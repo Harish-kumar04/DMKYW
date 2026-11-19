@@ -97,6 +97,7 @@ $('#kd').addEventListener('click',e=>{if(e.target.id==='kd')$('#kd').close()});
     stopAuto();
     if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
     timer=setInterval(()=>{if(!isInteracting)next()},4000);
+    fig.dispatchEvent(new CustomEvent('ym:auto'));
   }
 
   function stopAuto(){if(timer){clearInterval(timer);timer=null}}

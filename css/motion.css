@@ -26,7 +26,10 @@
 @keyframes ymSlide{from{opacity:0;translate:-26px 0}to{opacity:1;translate:0 0}}
 @keyframes ymRise{from{opacity:0;translate:0 38px;filter:blur(8px)}to{opacity:1;translate:0 0;filter:none}}
 @keyframes ymFig{from{translate:46px 0}to{translate:0 0}}
-@keyframes ymZoom{from{scale:1.14}to{scale:1}}
+@keyframes ymZoom{from{scale:1.22}to{scale:1.08}}
+@keyframes ymFill{to{scale:1 1}}
+@keyframes ymGlare{from{opacity:1;translate:-45% 0}to{opacity:1;translate:45% 0}}
+@keyframes ymRoll{from{translate:0 100%;opacity:0}to{translate:0 0;opacity:1}}
 @keyframes ymNav{from{translate:0 -100%}to{translate:0 0}}
 @keyframes ymRing{from{box-shadow:0 0 0 0 #d70f0a66,0 8px 20px #d70f0a40}to{box-shadow:0 0 0 18px #d70f0a00,0 8px 20px #d70f0a40}}
 @keyframes ymRingW{from{box-shadow:0 0 0 0 #ffffffaa}to{box-shadow:0 0 0 18px #fff0}}
@@ -46,11 +49,54 @@ nav{animation:ymNav .7s var(--ym-out) backwards}
 /* primary CTA: two attention rings once the sequence has settled, then stops */
 .in1>.btns .pill:first-child{animation:ymRing 1.4s 1.9s ease-out 2}
 
-/* hero photo: frame slides in, first image settles from a slight zoom, hover pushes in */
-.fig{animation:ymFig .9s .15s var(--ym-out) backwards}
-#hi{animation:ymZoom 1.6s var(--ym-out) backwards}
-.fig-slide img{transition:transform .5s ease,scale 1.2s var(--ym-out)}
-.fig:hover .fig-slide img{scale:1.045}
+/* ---------- hero carousel ----------
+   Frame slides in on load. Then (js/motion.js drives the classes/vars):
+   - every photo sits slightly zoomed (1.08) so it can parallax inside its slide without showing edges
+   - the slide that becomes active settles from a zoom (.is-active), the frame gets a glare sweep (.flash)
+     and a direction-aware nudge (Web Animations API), the counter rolls, the active dot fills like a story timer
+   - desktop: soft 3D tilt + pointer highlight on the frame, mouse drag to swipe */
+.fig{animation:ymFig .9s .15s var(--ym-out) backwards;transition:transform .25s ease-out}
+.fig-slide img{scale:1.08;transition:transform .5s ease,scale 1.2s var(--ym-out);-webkit-user-drag:none}
+.fig-slide.is-active img{animation:ymZoom 1.5s var(--ym-out) backwards}
+.fig:hover .fig-slide img{scale:1.12}
+
+/* glare sweep across the frame when the slide changes */
+.fig:after{content:"";position:absolute;inset:-20% -60%;z-index:2;pointer-events:none;opacity:0;translate:-45% 0;
+  background:linear-gradient(105deg,#fff0 42%,#ffffff66 50%,#fff0 58%)}
+.fig.flash:after{animation:ymGlare .9s var(--ym-out)}
+
+/* pointer highlight (mouse only) */
+@media (hover:hover) and (pointer:fine){
+  .fig:before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity .3s;
+    background:radial-gradient(300px circle at var(--hx,50%) var(--hy,50%),#ffffff2e,#fff0 62%)}
+  .fig:hover:before{opacity:1}
+  .fig-track{cursor:grab}
+  .fig.drag .fig-track{cursor:grabbing}
+}
+
+/* arrows + dots */
+.fig-arrow{transition:opacity .25s,transform .2s,background .2s,translate .3s var(--ym-spring)}
+.fig-arrow.next:hover{translate:3px 0}
+.fig-arrow.prev:hover{translate:-3px 0}
+.fig-arrow:active{transform:translateY(-50%) scale(.88)}
+.fig-dot{position:relative;overflow:hidden}
+.fig-dot:hover{scale:1.25}
+.fig-dot.on{width:36px}
+/* story-style timer inside the active dot; --ym-d (negative delay) keeps it in sync with autoplay */
+.fig-dot.on:after{content:"";position:absolute;inset:0;background:var(--red);transform-origin:left;scale:0 1;
+  animation:ymFill 4s linear forwards;animation-delay:var(--ym-d,0s)}
+.fig-dot.on.nofill:after{animation:none}
+.fig.paused .fig-dot.on:after{animation-play-state:paused}
+
+/* slide counter 01 / 03 (element created by motion.js) */
+.fig-count{position:absolute;left:12px;bottom:8px;z-index:3;display:flex;align-items:center;gap:8px;pointer-events:none;
+  padding:3px 12px 3px 10px;border-radius:999px;background:#14070690;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  color:#fff;font:400 17px/1.15 Anton,sans-serif;letter-spacing:.08em}
+.fig-count .cn{display:inline-block;overflow:hidden;height:1.15em}
+.fig-count b{display:block;font-weight:inherit}
+.fig-count b.roll{animation:ymRoll .55s var(--ym-out)}
+.fig-count i{display:block;width:24px;height:2px;background:#ffffffb3}
+.fig-count .ct{opacity:.7}
 
 /* logo */
 .lgo .em{transition:rotate .5s var(--ym-spring),scale .4s var(--ym-out)}
